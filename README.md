@@ -4,6 +4,6 @@ FoodTrucks
 Finds local food trucks and gives directions
 
 to use...
-pip install beautifulsoup4
-pip install flask
-run python web.py
+1. pip install beautifulsoup4
+2. pip install flask
+3. run python web.py
