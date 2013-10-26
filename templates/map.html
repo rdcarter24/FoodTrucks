@@ -14,29 +14,35 @@
     </script>
 
     <script>
+        // set up variables to display directions
+        var directionsService = new google.maps.DirectionsService();
+        var directionsDisplay = new google.maps.DirectionsRenderer()
+
         function getLocation(){
-            //get the users geolocation, function loads automatically with page
+            // get the users geolocation, function loads automatically with page
+
             if (navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(initialize);
             }
-            // do something with this error message
+            // NOTE: do something with this error message
             else{x.innerHTML="Geolocation is not supported by this browser.";}
             }
-        var directionsDisplay;
-        var directionsService = new google.maps.DirectionsService();
 
         function initialize(position) {
-            // initaialize the map with users location as center
-            directionsDisplay = new google.maps.DirectionsRenderer();
+            // initaialize the map with users location as center, set up directions display, and add all markers
+
             var userLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             var mapOptions = {
                 center: userLatLng,
                 zoom: 12,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
-            };
+            }
 
+            // set up map and directions display
             var map = new google.maps.Map(document.getElementById("map-canvas"),
                 mapOptions);
+            directionsDisplay.setMap(map);
+            directionsDisplay.setPanel(document.getElementById("directionsPanel"));
 
             // add marker for user
             var user = new google.maps.Marker({
@@ -45,9 +51,7 @@
                 title: "user"
             });
 
-            directionsDisplay.setMap(map);
-
-            // add marker for foodtrucks within 2 miles
+            // add markers for foodtrucks within some distance NOTE: pick some distance (meters)
             var trucks = {{ trucks | safe }};
             for (truck in trucks){
                 var location = new google.maps.Geocoder()
@@ -55,35 +59,37 @@
                     return function(results, status) {
                         if (status == google.maps.GeocoderStatus.OK) {
                             var truckLatLng = results[0].geometry.location
-                            if (google.maps.geometry.spherical.computeDistanceBetween(userLatLng,truckLatLng)<5000){
+                            if (google.maps.geometry.spherical.computeDistanceBetween(userLatLng,truckLatLng)<500000){
                                 var marker = new google.maps.Marker({
                                     map: map,
                                     position: truckLatLng,
                                     title: truck
                                 });
-                                console.log(truck)
+
+                                // get directions when user clicks on truck marker
                                 google.maps.event.addListener(marker, 'click', function(){
-                                    calcRoute(userLatLng,marker.getPosition())
+                                    calcRoute(userLatLng,marker.getPosition());
                                 });
-                            };
+                            }
                         }
                     }
                 })(truck));
             }
         }
 
-
         function calcRoute(userLatLng, truckLatLng) {
             // get directions from user to foodtruck
+
             var request = {
                 origin:userLatLng,
-                destination:truckLatLng,//new google.maps.LatLng(latitude, longitude),
-                travelMode: google.maps.TravelMode.DRIVING
+                destination:truckLatLng,
+                travelMode: google.maps.TravelMode.WALKING
             };
+
             directionsService.route(request, function(result, status) {
-            if (status == google.maps.DirectionsStatus.OK) {
-                directionsDisplay.setDirections(result);
-            }
+                if (status == google.maps.DirectionsStatus.OK) {
+                    directionsDisplay.setDirections(result);
+                }
           });
         }
 
@@ -94,5 +100,6 @@
 <body>
 
     <div id="map-canvas" style="float:left;width:70%; height:100%"></div>
+    <div id="directionsPanel" style="float:right;width:30%;height 100%"></div>
 
 </body>
