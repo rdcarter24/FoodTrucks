@@ -51,23 +51,24 @@
             var trucks = {{ trucks | safe }};
             for (truck in trucks){
                 var location = new google.maps.Geocoder()
-                location.geocode( { 'address': trucks[truck][0]}, function(results, status) {
-                    if (status == google.maps.GeocoderStatus.OK) {
-                        var truckLatLng = results[0].geometry.location
-                        if (google.maps.geometry.spherical.computeDistanceBetween(userLatLng,truckLatLng)<500000){
-
-                            var marker = new google.maps.Marker({
-                                map: map,
-                                position: truckLatLng,
-                                title: truck
-                            });
-
-                            google.maps.event.addListener(marker, 'click', function(){
-                                calcRoute(userLatLng,marker.getPosition())
-                            });
-                        };
+                location.geocode( { 'address': trucks[truck][0]}, (function(truck){
+                    return function(results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            var truckLatLng = results[0].geometry.location
+                            if (google.maps.geometry.spherical.computeDistanceBetween(userLatLng,truckLatLng)<5000){
+                                var marker = new google.maps.Marker({
+                                    map: map,
+                                    position: truckLatLng,
+                                    title: truck
+                                });
+                                console.log(truck)
+                                google.maps.event.addListener(marker, 'click', function(){
+                                    calcRoute(userLatLng,marker.getPosition())
+                                });
+                            };
+                        }
                     }
-                })
+                })(truck));
             }
         }
 
