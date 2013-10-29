@@ -16,6 +16,5 @@ def get_closest_food_trucks():
     for truck in trucks_info:
         # dictionary: key = truck name, value = [truck location, truck schedule]
         truck_dict[truck.find('h2').string] = [truck.find('p',{'class':'truck_address'}).string, truck.find('p',{'class':'truck_time'}).string]
-    print truck_dict
     return truck_dict
 

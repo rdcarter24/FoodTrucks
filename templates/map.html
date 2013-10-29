@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <h3>Click on a Food Truck to get directions!</h3>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
     <style type="text/css">
@@ -24,9 +25,11 @@
             if (navigator.geolocation){
                 navigator.geolocation.getCurrentPosition(initialize);
             }
-            // NOTE: do something with this error message
-            else{x.innerHTML="Geolocation is not supported by this browser.";}
+            else{
+                document.write("Geolocation is not supported by this browser.");
+                // have user enter address and translate to LatLng, send to initialize function
             }
+        }
 
         function initialize(position) {
             // initaialize the map with users location as center, set up directions display, and add all markers
@@ -51,19 +54,19 @@
                 title: "user"
             });
 
-            // add markers for foodtrucks within some distance NOTE: pick some distance (meters)
+            // add markers for foodtrucks
             var trucks = {{ trucks | safe }};
-            for (truck in trucks){
-                var location = new google.maps.Geocoder()
-                location.geocode( { 'address': trucks[truck][0]}, (function(truck){
-                    return function(results, status) {
-                        if (status == google.maps.GeocoderStatus.OK) {
-                            var truckLatLng = results[0].geometry.location
-                            if (google.maps.geometry.spherical.computeDistanceBetween(userLatLng,truckLatLng)<500000){
+            if (Object.keys(trucks).length !== 0){
+                for (truck in trucks){
+                    var location = new google.maps.Geocoder()
+                    location.geocode( { 'address': trucks[truck][0]}, (function(truck){
+                        return function(results, status) {
+                            if (status == google.maps.GeocoderStatus.OK) {
+                                var truckLatLng = results[0].geometry.location
                                 var marker = new google.maps.Marker({
                                     map: map,
                                     position: truckLatLng,
-                                    title: truck
+                                    title: truck // also add schedule trucks[truck][0]
                                 });
 
                                 // get directions when user clicks on truck marker
@@ -71,10 +74,18 @@
                                     calcRoute(userLatLng,marker.getPosition());
                                 });
                             }
+                            else{
+                                // write an error message
+                            }
                         }
-                    }
-                })(truck));
+                    })(truck));
+                }
             }
+
+            else{
+                document.write("Sorry, no food trucks right now. :( Please try again later.")
+            }
+
         }
 
         function calcRoute(userLatLng, truckLatLng) {
@@ -83,7 +94,7 @@
             var request = {
                 origin:userLatLng,
                 destination:truckLatLng,
-                travelMode: google.maps.TravelMode.WALKING
+                travelMode: google.maps.TravelMode.WALKING // have an option for user to enter Mode.
             };
 
             directionsService.route(request, function(result, status) {
