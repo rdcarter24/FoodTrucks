@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <h3>Click on a Food Truck to get directions!</h3>
+    <h3 id="output">Click on a food truck to get directions!</h3>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
     <style type="text/css">
@@ -63,6 +63,7 @@
                         return function(results, status) {
                             if (status == google.maps.GeocoderStatus.OK) {
                                 var truckLatLng = results[0].geometry.location
+                                console.log(truckLatLng)
                                 var marker = new google.maps.Marker({
                                     map: map,
                                     position: truckLatLng,
@@ -83,7 +84,7 @@
             }
 
             else{
-                document.write("Sorry, no food trucks right now. :( Please try again later.")
+                document.getElementById("output").innerHTML = "Sorry, no food trucks right now. :( Please try again later."
             }
 
         }
